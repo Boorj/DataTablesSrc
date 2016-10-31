@@ -106,14 +106,32 @@ function _fnRowAttributes( settings, row )
 
 		if ( data.DT_RowClass ) {
 			// Remove any classes added by DT_RowClass before
-			var a = data.DT_RowClass.split(' ');
-			row.__rowc = row.__rowc ?
-				_unique( row.__rowc.concat( a ) ) :
-				a;
+			var split_DT_RowClass = data.DT_RowClass.match( /\S+/g ) || [];
 
-			$(tr)
-				.removeClass( row.__rowc.join(' ') )
-				.addClass( data.DT_RowClass );
+			row.__rowc = row.__rowc ? 
+				_unique( row.__rowc.concat( split_DT_RowClass ) )
+				: split_DT_RowClass;
+
+			var j, clazz;
+			var curValue = tr.getAttribute && tr.getAttribute( "class" ) || "";
+			var cur = ( " " + curValue + " " ).replace( /[\t\r\n\f]/g , " " );
+
+			j = 0;
+			while ( ( clazz = row.__rowc[ j++ ] ) ) {
+				cur.replace(clazz, " ")
+			}
+
+			j = 0;
+			while ( ( clazz = split_DT_RowClass[ j++ ] ) ) {
+				if ( cur.indexOf( " " + clazz + " " ) < 0 ) {
+					cur += clazz + " ";
+				}
+			}
+			
+			var finalValue = cur.replace( "\s+" , " " ).trim();
+			if ( curValue !== finalValue ) {
+				tr.setAttribute( "class", finalValue );
+			}
 		}
 
 		if ( data.DT_RowAttr ) {
